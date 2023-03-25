@@ -1,0 +1,60 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.33424.131
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Forum-API", "Forum-API\Forum-API.csproj", "{E13BD895-AA0C-42B0-B409-D2EE1416670C}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Forum-Project(ADO.NET+Dapper)", "Forum-Project(ADO.NET+Dapper)", "{7FE449C8-DAAF-4AD2-B7B5-475A450A1F14}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Forum-DAL", "Forum-DAL\Forum-DAL.csproj", "{86E17F83-249D-4E3C-9174-7F4904080AA1}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Forum-BAL", "Forum-BAL\Forum-BAL.csproj", "{539D5A6F-AB39-40B9-89DE-9C1AAF57044B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Catalog-of-Games-Project(Entity-Framework)", "Catalog-of-Games-Project(Entity-Framework)", "{DAD24511-602B-40A9-8C31-A9CEB13D6854}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Catalog-of-Games-DAL", "Catalog-of-Games-DAL\Catalog-of-Games-DAL.csproj", "{10F5833A-9C69-4B91-AED2-D05893F64194}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Catalog-of-Games-BAL", "Catalog-of-Games-BAL\Catalog-of-Games-BAL.csproj", "{7FE98C2B-99CB-46A7-A3C9-CCD315D1AD0B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E13BD895-AA0C-42B0-B409-D2EE1416670C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E13BD895-AA0C-42B0-B409-D2EE1416670C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E13BD895-AA0C-42B0-B409-D2EE1416670C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E13BD895-AA0C-42B0-B409-D2EE1416670C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{86E17F83-249D-4E3C-9174-7F4904080AA1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{86E17F83-249D-4E3C-9174-7F4904080AA1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{86E17F83-249D-4E3C-9174-7F4904080AA1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{86E17F83-249D-4E3C-9174-7F4904080AA1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{539D5A6F-AB39-40B9-89DE-9C1AAF57044B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{539D5A6F-AB39-40B9-89DE-9C1AAF57044B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{539D5A6F-AB39-40B9-89DE-9C1AAF57044B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{539D5A6F-AB39-40B9-89DE-9C1AAF57044B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{10F5833A-9C69-4B91-AED2-D05893F64194}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{10F5833A-9C69-4B91-AED2-D05893F64194}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{10F5833A-9C69-4B91-AED2-D05893F64194}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{10F5833A-9C69-4B91-AED2-D05893F64194}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7FE98C2B-99CB-46A7-A3C9-CCD315D1AD0B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7FE98C2B-99CB-46A7-A3C9-CCD315D1AD0B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7FE98C2B-99CB-46A7-A3C9-CCD315D1AD0B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7FE98C2B-99CB-46A7-A3C9-CCD315D1AD0B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{E13BD895-AA0C-42B0-B409-D2EE1416670C} = {7FE449C8-DAAF-4AD2-B7B5-475A450A1F14}
+		{86E17F83-249D-4E3C-9174-7F4904080AA1} = {7FE449C8-DAAF-4AD2-B7B5-475A450A1F14}
+		{539D5A6F-AB39-40B9-89DE-9C1AAF57044B} = {7FE449C8-DAAF-4AD2-B7B5-475A450A1F14}
+		{10F5833A-9C69-4B91-AED2-D05893F64194} = {DAD24511-602B-40A9-8C31-A9CEB13D6854}
+		{7FE98C2B-99CB-46A7-A3C9-CCD315D1AD0B} = {DAD24511-602B-40A9-8C31-A9CEB13D6854}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {61F11005-0CCD-4CC3-B1BA-338C8131E548}
+	EndGlobalSection
+EndGlobal
