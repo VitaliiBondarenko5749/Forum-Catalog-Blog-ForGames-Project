@@ -12,6 +12,6 @@ namespace Forum_DAL.Contracts
         /// </summary>
         /// <param name="gameName"></param>
         /// <returns>id founded Game</returns>
-        public Task<int> GetGameByNameAsync(string gameName);
+        public Task<int> GetGameIdByNameAsync(string gameName);
     }
 }

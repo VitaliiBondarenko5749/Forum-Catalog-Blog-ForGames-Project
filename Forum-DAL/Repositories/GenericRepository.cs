@@ -51,9 +51,7 @@ namespace Forum_DAL.Repositories
         {
             string insertQuery = GenerateInsertQuery();
 
-            int newId = await sqlConnection.ExecuteScalarAsync<int>(insertQuery, param: model, transaction: dbTransaction);
-
-            return newId;
+            return await sqlConnection.ExecuteScalarAsync<int>(insertQuery, param: model, transaction: dbTransaction);
         }
 
         public async Task ReplaceAsync(T model)

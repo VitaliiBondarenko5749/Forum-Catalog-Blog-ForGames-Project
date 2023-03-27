@@ -23,16 +23,12 @@ namespace Forum_DAL.Repositories
         /// </summary>
         /// <param name="gameName"></param>
         /// <returns>id founded Game</returns>
-        public async Task<int> GetGameByNameAsync(string gameName)
+        public async Task<int> GetGameIdByNameAsync(string gameName)
         {
-            try
-            {
-                string sqlQuery = "SELECT TOP 1 Id FROM gamecatalog.Games WHERE Name = @Name;";
+            string sqlQuery = "SELECT TOP 1 Id FROM gamecatalog.Games WHERE Name = @Name;";
 
-                return await sqlConnection.QueryFirstAsync<int>(sqlQuery, param: new { Name = gameName },
-                    transaction: dbTransaction);
-            }
-            catch { return 0; }
+            return await sqlConnection.QueryFirstAsync<int>(sqlQuery, param: new { Name = gameName },
+                transaction: dbTransaction);
         }
     }
 }

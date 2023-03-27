@@ -10,7 +10,7 @@ namespace Forum_BAL.Services
 {
     public class PostService : IPostService
     {
-        private IUnitOfWork unitOfWork { get; }
+        private readonly IUnitOfWork unitOfWork;
 
         public PostService(IUnitOfWork unitOfWork)
         {
@@ -114,42 +114,33 @@ namespace Forum_BAL.Services
                 CreatedAt = DateTime.Now
             };
 
-            // Перевіряємо чи передаються якісь ігри з DTO
-            if (postInsertDto.Games != null)
-            {
-                // Ініціалізуємо колекцію ігор, новим списком щоб додавати туди ігри
-                post.Games = new List<Game>();
-
-                // Проходимо ітерацію для запису інформації з DTO в модель
-                foreach (ShortGameInfoDTO gameInfoDTO in postInsertDto.Games)
-                {
-                    post.Games.Add(new Game { Name = gameInfoDTO.Name });
-                }
-            }
-
             PostGame postGame = new PostGame()
             {
                 // Тепер додаємо новий пост в базу даних + отримуємо айді нового поста 
                 PostId = await unitOfWork.PostRepository.AddAsync(post)
             };
 
-            if (post.Games != null)
+            if (postInsertDto.Games != null)
             {
-                foreach (Game game in post.Games)
+                foreach (ShortGameInfoDTO game in postInsertDto.Games)
                 {
-                    if (game.Name != null)
+                    try
                     {
-                        // Пробуємо знайти гру за іменем з таблиці Games, та повернути її id.
-                        // Якщо гру не знайде -  і нас перекине в catch і почнеться нова ітерація
-                        postGame.GameId = await unitOfWork.GameRepository.GetGameByNameAsync(game.Name);
+                        if (game.Name != null)
+                        {
+                            // Пробуємо знайти гру за іменем з таблиці Games, та повернути її id.
+                            // Якщо гру не знайде -  і нас перекине в catch і почнеться нова ітерація
+                            postGame.GameId = await unitOfWork.GameRepository.GetGameIdByNameAsync(game.Name);
 
-                        if(postGame.GameId == 0) { continue; }
-
-                        // У разі знаходження гри, вставляємо значення id в проміжну таблицю PostsGames
-                        await unitOfWork.PostGameRepository.AddAsync(postGame);
+                            // У разі знаходження гри, вставляємо значення id в проміжну таблицю PostsGames
+                            await unitOfWork.PostGameRepository.AddAsync(postGame);
+                        }
                     }
+                    catch { continue; }
                 }
             }
+
+            unitOfWork.Commit();
         }
 
         // Оновлюємо пост
@@ -176,7 +167,7 @@ namespace Forum_BAL.Services
                         try
                         {
                             // Шукаємо гру за іменем і отримуємо id гри. Якщо нам не знайде - вийняток і нова ітерація
-                            int gameId = await unitOfWork.GameRepository.GetGameByNameAsync(gameInfoDTO.Name);
+                            int gameId = await unitOfWork.GameRepository.GetGameIdByNameAsync(gameInfoDTO.Name);
 
                             // У разі знаходження додаємо айді до колекції
                             gamesId.Add(gameId);
