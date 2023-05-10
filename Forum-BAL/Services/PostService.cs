@@ -1,10 +1,8 @@
 ﻿using AutoMapper;
-using Catalog_of_Games_DAL.Entities;
 using Forum_BAL.Contracts;
 using Forum_BAL.DTO;
 using Forum_DAL.Contracts;
 using Forum_DAL.Models;
-
 
 namespace Forum_BAL.Services
 {
@@ -18,7 +16,7 @@ namespace Forum_BAL.Services
         }
 
         // Отримуємо всі пости та ігри, які пов'язані до кожного поста
-        public async Task<IEnumerable<ShortPostInfoDTO>> GetAllPostsAndGamesAsync()
+        public async Task<IEnumerable<ShortPostInfoDTO>> GetAllPostsAsync()
         {
             // Отримання всіх постів
             IEnumerable<Post> posts = await unitOfWork.PostRepository.GetAllAsync();
@@ -30,7 +28,7 @@ namespace Forum_BAL.Services
                 post.Games = (List<Game>)await unitOfWork.GameRepository.GetAllGamesForPostAsync(post.Id);
             }
 
-            MapperConfiguration configuration = new MapperConfiguration(cfg =>
+            MapperConfiguration configuration = new(cfg =>
             {
                 cfg.CreateMap<Post, ShortPostInfoDTO>()
                 .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => src.CreatedAt.ToString("yyyy-dd-MM")));
@@ -48,16 +46,10 @@ namespace Forum_BAL.Services
         /* Отримуємо інформацію про конкретний пост та всю інформацію про нього:
          * Коментарі
          * Відповіді на коментар */
-        public async Task<ConcretePostInfoDTO> GetPostAsync(int postId)
+        public async Task<ConcretePostInfoDTO> GetPostAsync(Guid postId)
         {
             // Отримуємо конкретний пост
             Post post = await unitOfWork.PostRepository.GetAsync(postId);
-
-            // Перевіряємо, чи отримали ми якийсь пост. Якщо нічого - виходимо з методу.
-            if (post == null)
-            {
-                throw new Exception("Couldn't get Post by id.");
-            }
 
             // Отримуємо ігри, які пов'язані з постом
             post.Games = (List<Game>)await unitOfWork.GameRepository.GetAllGamesForPostAsync(postId);
@@ -82,7 +74,7 @@ namespace Forum_BAL.Services
                 }
             }
 
-            MapperConfiguration configuration = new MapperConfiguration(cfg =>
+            MapperConfiguration configuration = new(cfg =>
             {
                 cfg.CreateMap<Post, ConcretePostInfoDTO>()
                 .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => src.CreatedAt.ToString("yyyy-dd-MM")));
@@ -107,17 +99,20 @@ namespace Forum_BAL.Services
         public async Task AddPostAsync(PostInsertUpdateDTO postInsertDto)
         {
             // Ініціалізуємо пост
-            Post post = new Post()
+            Post post = new()
             {
+                Id = Guid.NewGuid(),
                 Title = postInsertDto.Title,
                 Content = postInsertDto.Content,
                 CreatedAt = DateTime.Now
             };
 
-            PostGame postGame = new PostGame()
+            // Тепер додаємо новий пост в базу даних
+            _ = await unitOfWork.PostRepository.AddAsync(post);
+
+            PostGame postGame = new()
             {
-                // Тепер додаємо новий пост в базу даних + отримуємо айді нового поста 
-                PostId = await unitOfWork.PostRepository.AddAsync(post)
+                PostId = post.Id
             };
 
             if (postInsertDto.Games != null)
@@ -147,16 +142,14 @@ namespace Forum_BAL.Services
         public async Task UpdatePostAsync(PostInsertUpdateDTO postUpdateDto)
         {
             // Отримуємо пост з бази даних + перевіряємо чи є взагалі такий пост(якщо нема - буде вийняток).
-            Post post = await unitOfWork.PostRepository.GetAsync(postUpdateDto.Id) ??
-                throw new Exception($"Post with id: {postUpdateDto.Id} does not exist.");
+            Post post = await unitOfWork.PostRepository.GetAsync(postUpdateDto.Id);
 
             // Присвоюємо посту нову інформацію
-            post.Id = postUpdateDto.Id;
             post.Title = postUpdateDto.Title;
             post.Content = postUpdateDto.Content;
 
-            //Створюємо колекцію int, яка зберігає нам id ігор
-            ICollection<int> gamesId = new List<int>();
+            //Створюємо колекцію int, яка зберігає нам id ігор, пов'язаних з постом
+            ICollection<Guid> gamesId = new List<Guid>();
 
             if (postUpdateDto.Games != null)
             {
@@ -167,7 +160,7 @@ namespace Forum_BAL.Services
                         try
                         {
                             // Шукаємо гру за іменем і отримуємо id гри. Якщо нам не знайде - вийняток і нова ітерація
-                            int gameId = await unitOfWork.GameRepository.GetGameIdByNameAsync(gameInfoDTO.Name);
+                            Guid gameId = await unitOfWork.GameRepository.GetGameIdByNameAsync(gameInfoDTO.Name);
 
                             // У разі знаходження додаємо айді до колекції
                             gamesId.Add(gameId);
@@ -177,67 +170,85 @@ namespace Forum_BAL.Services
                 }
             }
 
+            // Створюємо екземпляр класу PostGame, для передачі параметрів в методи обробки запиту
+            PostGame postGameParam = new() { PostId = post.Id };
+
             if (gamesId != null)
             {
-                foreach (int gameId in gamesId)
+                foreach (Guid gameId in gamesId)
                 {
                     try
                     {
+                        postGameParam.GameId = gameId;
+
                         // Находимо, чи є зв'язки між грою та постом
                         PostGame postGame = await unitOfWork.PostGameRepository.
-                            GetConnectedPostAndGameAsync(new PostGame { PostId = post.Id, GameId = gameId });
+                            GetConnectedPostAndGameAsync(postGameParam);
                     }
                     catch
                     {
                         // Якщо зв'язку немає - додаємо новий зв'язок
-                        _ = unitOfWork.PostGameRepository.AddAsync(new PostGame { PostId = post.Id, GameId = gameId });
+                        _ = unitOfWork.PostGameRepository.AddAsync(postGameParam);
                     }
                 }
             }
 
             // Отримуємо колекцію всіх GameId пов'язаних з постом
-            ICollection<int> allGamesId = (List<int>)await unitOfWork.PostGameRepository.GetGamesIdAsync(post.Id);
+            ICollection<Guid> allGamesId = (List<Guid>)await unitOfWork.PostGameRepository.GetGamesIdAsync(post.Id);
 
-            foreach (int gameId in allGamesId)
+            foreach (Guid gameId in allGamesId)
             {
                 if (gamesId != null && !gamesId.Contains(gameId))
                 {
-                    await unitOfWork.PostGameRepository.
-                        DeletePostGameAsync(new PostGame { PostId = post.Id, GameId = gameId });
+                    postGameParam.GameId = gameId;
+
+                    await unitOfWork.PostGameRepository.DeletePostGameAsync(postGameParam);
                 }
             }
 
             await unitOfWork.PostRepository.ReplaceAsync(post);
+
+            unitOfWork.Commit();
         }
 
         // Видаляємо пост
-        public async Task DeletePostAsync(int postId)
-        {
+        public async Task DeletePostAsync(Guid postId)
+        {  
             // Знаходимо пост за айді. У разі, якщо не знайде - викине вийняток 
-            Post post = await unitOfWork.PostRepository.GetAsync(postId);
+            _ = await unitOfWork.PostRepository.GetAsync(postId);
 
             // Отримання всіх CommentId, які пов'язані з постом
-            IEnumerable<int> commentIds = await unitOfWork.PostCommentRepository.GetCommentsIdAsync(postId);
+            IEnumerable<Guid> commentIds = await unitOfWork.PostCommentRepository.GetCommentsIdAsync(postId);
+
+            List<Guid>? allReplyIds = null;
 
             // Проходимо ітерацію по кожному commentId
-            foreach (int commentId in commentIds)
+            foreach (Guid commentId in commentIds)
             {
                 // Отримання всіх ReplyId, які пов'язані з коментом
-                IEnumerable<int> repliesId = await unitOfWork.CommentReplyRepository.GetRepliesIdAsync(commentId);
+                List<Guid> repliesId = (List<Guid>)await unitOfWork.CommentReplyRepository.GetRepliesIdAsync(commentId);
 
-                // Проходимо ітерацію по кожному знайденому ReplyId
-                foreach (int replyId in repliesId)
-                {
-                    // Видаляємо відповідь на комент
-                    await unitOfWork.ReplyRepository.DeleteAsync(replyId);
-                }
+                allReplyIds ??= new List<Guid>(); 
+
+                allReplyIds.AddRange(repliesId);
 
                 // Видаляємо коментар
                 await unitOfWork.CommentRepository.DeleteAsync(commentId);
             }
 
+            if (allReplyIds is not null)
+            {
+                foreach (Guid replyId in allReplyIds.Distinct())
+                {
+                    await unitOfWork.ReplyRepository.DeleteAsync(replyId);
+                }
+            }
+
             // Видаляємо пост
             await unitOfWork.PostRepository.DeleteAsync(postId);
+
+            // Підтверджуємо зміни в базі даних
+            unitOfWork.Commit();
         }
     }
 }

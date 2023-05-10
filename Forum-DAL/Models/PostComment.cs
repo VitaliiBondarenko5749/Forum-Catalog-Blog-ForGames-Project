@@ -2,7 +2,7 @@
 {
     public class PostComment
     {
-        public int PostId { get; set; }
-        public int CommentId { get; set; }
+        public Guid PostId { get; set; }
+        public Guid CommentId { get; set; }
     }
 }

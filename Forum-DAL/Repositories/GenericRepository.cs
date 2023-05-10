@@ -26,7 +26,7 @@ namespace Forum_DAL.Repositories
                 transaction: dbTransaction);
         }
 
-        public async Task<T> GetAsync(int id)
+        public async Task<T> GetAsync(Guid id)
         {
             T result = await sqlConnection.QuerySingleOrDefaultAsync<T>($"SELECT * FROM {tableName} WHERE Id=@Id;",
                 param: new { Id = id }, transaction: dbTransaction);
@@ -39,19 +39,17 @@ namespace Forum_DAL.Repositories
             return result;
         }
 
-        public async Task DeleteAsync(int id)
+        public async Task DeleteAsync(Guid id)
         {
             await sqlConnection.ExecuteAsync($"DELETE FROM {tableName} WHERE Id=@Id;", param: new { Id = id },
                 transaction: dbTransaction);
-
-            dbTransaction.Commit();
         }
 
-        public async Task<int> AddAsync(T model)
+        public async Task<Guid> AddAsync(T model)
         {
             string insertQuery = GenerateInsertQuery();
 
-            return await sqlConnection.ExecuteScalarAsync<int>(insertQuery, param: model, transaction: dbTransaction);
+            return await sqlConnection.ExecuteScalarAsync<Guid>(insertQuery, param: model, transaction: dbTransaction);
         }
 
         public async Task ReplaceAsync(T model)
@@ -93,7 +91,7 @@ namespace Forum_DAL.Repositories
         // Генерація списку властивостей
         private List<string> GenerateListOfProperties(IEnumerable<PropertyInfo> propertyList)
         {
-            return propertyList.Select(p => p.Name).Where(p => !p.Equals("Id")).ToList();
+            return propertyList.Select(p => p.Name).ToList();
         }
 
         // Генерація UPDATE запиту

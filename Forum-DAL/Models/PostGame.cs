@@ -2,7 +2,7 @@
 {
     public class PostGame
     {
-        public int PostId { get; set; }
-        public int GameId { get; set; }
+        public Guid PostId { get; set; }
+        public Guid GameId { get; set; }
     }
 }

@@ -12,11 +12,20 @@ namespace Forum_DAL.Repositories
             : base(sqlConnection, dbTransaction, "forum.PostsComments") { }
 
         // Отримання всіх CommentId, які пов'язані з постом
-        public async Task<IEnumerable<int>> GetCommentsIdAsync(int postId)
+        public async Task<IEnumerable<Guid>> GetCommentsIdAsync(Guid postId)
         {
             string sqlQuery = "SELECT CommentId FROM forum.PostsComments WHERE PostId = @PostId;";
 
-            return await sqlConnection.QueryAsync<int>(sqlQuery, param: new { PostId = postId },
+            return await sqlConnection.QueryAsync<Guid>(sqlQuery, param: new { PostId = postId },
+                transaction: dbTransaction);
+        }
+
+        // Отримання значення CommentId з таблиці PostsComments, для того щоб перевірити коментар та пост на зв'язаність
+        public async Task<Guid> GetCommentIdByCommentAndPostIdsAsync(PostComment postComment)
+        {
+            string sqlQuery = "SELECT TOP 1 CommentId FROM forum.PostsComments WHERE PostId = @PostId AND CommentId = @CommentId;";
+
+            return await sqlConnection.QueryFirstAsync<Guid>(sqlQuery, param: postComment,
                 transaction: dbTransaction);
         }
     }

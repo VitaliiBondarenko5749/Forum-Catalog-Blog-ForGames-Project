@@ -11,7 +11,7 @@ namespace Forum_DAL.Repositories
             ICommentRepository commentRepository, ILikedCommentRepository likedCommentRepository,
             IReplyRepository replyRepository, ILikedReplyRepository likedReplyRepository,
             IPostGameRepository postGameRepository, IPostCommentRepository postCommentRepository,
-            ICommentReplyRepository commentReplyRepository, IDbTransaction transaction) 
+            ICommentReplyRepository commentReplyRepository, IDbTransaction transaction)
         {
             PostRepository = postRepository;
             GameRepository = gameRepository;

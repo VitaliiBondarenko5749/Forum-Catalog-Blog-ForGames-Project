@@ -1,17 +1,17 @@
-﻿using Catalog_of_Games_DAL.Entities;
+﻿using Forum_DAL.Models;
 
 namespace Forum_DAL.Contracts
 {
     public interface IGameRepository : IGenericRepository<Game>
     {
         // Отримання колекції ігор, які зв'язані з відповідним постом(stored procedure).
-        Task<IEnumerable<Game>> GetAllGamesForPostAsync(int postId);
+        Task<IEnumerable<Game>> GetAllGamesForPostAsync(Guid postId);
 
         /// <summary>
         /// Знаходження гри за іменем 
         /// </summary>
         /// <param name="gameName"></param>
         /// <returns>id founded Game</returns>
-        public Task<int> GetGameIdByNameAsync(string gameName);
+        public Task<Guid> GetGameIdByNameAsync(string gameName);
     }
 }

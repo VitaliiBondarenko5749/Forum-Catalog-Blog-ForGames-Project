@@ -3,7 +3,6 @@ using Forum_DAL.Contracts;
 using Forum_DAL.Models;
 using System.Data;
 using System.Data.SqlClient;
-using System.Security.Cryptography.X509Certificates;
 
 namespace Forum_DAL.Repositories
 {
@@ -22,11 +21,11 @@ namespace Forum_DAL.Repositories
         }
 
         // Отримуємо колекцію всіх ігор, які пов'язані з постом
-        public async Task<IEnumerable<int>> GetGamesIdAsync(int postId)
+        public async Task<IEnumerable<Guid>> GetGamesIdAsync(Guid postId)
         {
             string sqlQuery = "SELECT GameId FROM forum.PostsGames WHERE PostId = @PostId;";
 
-            return await sqlConnection.QueryAsync<int>(sqlQuery, param: new { PostId = postId },
+            return await sqlConnection.QueryAsync<Guid>(sqlQuery, param: new { PostId = postId },
                 transaction: dbTransaction);
         }
 

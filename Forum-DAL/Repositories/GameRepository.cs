@@ -1,6 +1,6 @@
-﻿using Catalog_of_Games_DAL.Entities;
-using Dapper;
+﻿using Dapper;
 using Forum_DAL.Contracts;
+using Forum_DAL.Models;
 using System.Data;
 using System.Data.SqlClient;
 
@@ -12,7 +12,7 @@ namespace Forum_DAL.Repositories
             : base(sqlConnection, dbTransaction, "gamecatalog.Games") { }
 
         // Отримання колекції ігор, які зв'язані з відповідним постом(stored procedure).
-        public async Task<IEnumerable<Game>> GetAllGamesForPostAsync(int postId)
+        public async Task<IEnumerable<Game>> GetAllGamesForPostAsync(Guid postId)
         {
             return await sqlConnection.QueryAsync<Game>("GetAllGamesForPost", param: new { PostId = postId },
                 transaction: dbTransaction, commandType: CommandType.StoredProcedure);
@@ -23,11 +23,11 @@ namespace Forum_DAL.Repositories
         /// </summary>
         /// <param name="gameName"></param>
         /// <returns>id founded Game</returns>
-        public async Task<int> GetGameIdByNameAsync(string gameName)
+        public async Task<Guid> GetGameIdByNameAsync(string gameName)
         {
             string sqlQuery = "SELECT TOP 1 Id FROM gamecatalog.Games WHERE Name = @Name;";
 
-            return await sqlConnection.QueryFirstAsync<int>(sqlQuery, param: new { Name = gameName },
+            return await sqlConnection.QueryFirstAsync<Guid>(sqlQuery, param: new { Name = gameName },
                 transaction: dbTransaction);
         }
     }
