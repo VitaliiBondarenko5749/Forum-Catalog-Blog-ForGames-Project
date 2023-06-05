@@ -9,5 +9,8 @@ namespace Forum_DAL.Contracts
 
         // Отримання значення CommentId з таблиці PostsComments, для того щоб перевірити коментар та пост на зв'язаність
         Task<Guid> GetCommentIdByCommentAndPostIdsAsync(PostComment postComment);
+
+        // Перевірка на зв'язаність поста та коментаря
+        Task<bool> ExistAsync(PostComment postComment);
     }
 }

@@ -19,5 +19,13 @@ namespace Forum_DAL.Repositories
             return await sqlConnection.QueryAsync<Guid>(sqlQuery, param: new { CommentId = commentId },
                 transaction: dbTransaction);
         }
+
+        // Перевірка на зв'язаність коментаря та відповіді на коментар
+        public async Task<bool> ExistAsync(CommentReply commentReply)
+        {
+            string query = "SELECT COUNT(*) FROM forum.PostsReplies WHERE PostId = @PostId, ReplyId = @ReplyId;";
+
+            return await sqlConnection.QueryFirstOrDefaultAsync<int>(query, param: commentReply, transaction: dbTransaction) > 0;
+        }
     }
 }

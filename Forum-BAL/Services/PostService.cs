@@ -1,8 +1,11 @@
 ﻿using AutoMapper;
+using FluentValidation.Results;
 using Forum_BAL.Contracts;
 using Forum_BAL.DTO;
+using Forum_BAL.Validators;
 using Forum_DAL.Contracts;
 using Forum_DAL.Models;
+using System.Text;
 
 namespace Forum_BAL.Services
 {
@@ -16,10 +19,10 @@ namespace Forum_BAL.Services
         }
 
         // Отримуємо всі пости та ігри, які пов'язані до кожного поста
-        public async Task<IEnumerable<ShortPostInfoDTO>> GetAllPostsAsync()
+        public async Task<IEnumerable<ShortPostInfoDTO>> GetAllPostsAsync(int pageNumber = 1, int pageSize = 10)
         {
             // Отримання всіх постів
-            IEnumerable<Post> posts = await unitOfWork.PostRepository.GetAllAsync();
+            IEnumerable<Post>? posts = await unitOfWork.PostRepository.GetAllAsync(pageNumber, pageSize);
 
             // Проходимо ітерацію по всіх постах, для того щоб отримати колекцію ігор, які зв'язані з постом
             foreach (Post post in posts)
@@ -98,6 +101,22 @@ namespace Forum_BAL.Services
         // Вставляємо новий пост
         public async Task AddPostAsync(PostInsertUpdateDTO postInsertDto)
         {
+            // Перевіряємо дані
+            PostValidator validator = new();
+            ValidationResult result = await validator.ValidateAsync(postInsertDto);
+
+            if (!result.IsValid)
+            {
+                StringBuilder stringBuilder = new();
+
+                foreach(ValidationFailure error in result.Errors)
+                {
+                    stringBuilder.AppendLine(error.ErrorMessage);
+                }
+
+                throw new InvalidDataException(stringBuilder.ToString());
+            }
+
             // Ініціалізуємо пост
             Post post = new()
             {
@@ -108,7 +127,7 @@ namespace Forum_BAL.Services
             };
 
             // Тепер додаємо новий пост в базу даних
-            _ = await unitOfWork.PostRepository.AddAsync(post);
+            await unitOfWork.PostRepository.AddAsync(post);
 
             PostGame postGame = new()
             {
@@ -128,6 +147,7 @@ namespace Forum_BAL.Services
                             postGame.GameId = await unitOfWork.GameRepository.GetGameIdByNameAsync(game.Name);
 
                             // У разі знаходження гри, вставляємо значення id в проміжну таблицю PostsGames
+                            postGame.Id = Guid.NewGuid();
                             await unitOfWork.PostGameRepository.AddAsync(postGame);
                         }
                     }
@@ -138,84 +158,11 @@ namespace Forum_BAL.Services
             unitOfWork.Commit();
         }
 
-        // Оновлюємо пост
-        public async Task UpdatePostAsync(PostInsertUpdateDTO postUpdateDto)
-        {
-            // Отримуємо пост з бази даних + перевіряємо чи є взагалі такий пост(якщо нема - буде вийняток).
-            Post post = await unitOfWork.PostRepository.GetAsync(postUpdateDto.Id);
-
-            // Присвоюємо посту нову інформацію
-            post.Title = postUpdateDto.Title;
-            post.Content = postUpdateDto.Content;
-
-            //Створюємо колекцію int, яка зберігає нам id ігор, пов'язаних з постом
-            ICollection<Guid> gamesId = new List<Guid>();
-
-            if (postUpdateDto.Games != null)
-            {
-                foreach (ShortGameInfoDTO gameInfoDTO in postUpdateDto.Games)
-                {
-                    if (gameInfoDTO.Name != null)
-                    {
-                        try
-                        {
-                            // Шукаємо гру за іменем і отримуємо id гри. Якщо нам не знайде - вийняток і нова ітерація
-                            Guid gameId = await unitOfWork.GameRepository.GetGameIdByNameAsync(gameInfoDTO.Name);
-
-                            // У разі знаходження додаємо айді до колекції
-                            gamesId.Add(gameId);
-                        }
-                        catch { continue; }
-                    }
-                }
-            }
-
-            // Створюємо екземпляр класу PostGame, для передачі параметрів в методи обробки запиту
-            PostGame postGameParam = new() { PostId = post.Id };
-
-            if (gamesId != null)
-            {
-                foreach (Guid gameId in gamesId)
-                {
-                    try
-                    {
-                        postGameParam.GameId = gameId;
-
-                        // Находимо, чи є зв'язки між грою та постом
-                        PostGame postGame = await unitOfWork.PostGameRepository.
-                            GetConnectedPostAndGameAsync(postGameParam);
-                    }
-                    catch
-                    {
-                        // Якщо зв'язку немає - додаємо новий зв'язок
-                        _ = unitOfWork.PostGameRepository.AddAsync(postGameParam);
-                    }
-                }
-            }
-
-            // Отримуємо колекцію всіх GameId пов'язаних з постом
-            ICollection<Guid> allGamesId = (List<Guid>)await unitOfWork.PostGameRepository.GetGamesIdAsync(post.Id);
-
-            foreach (Guid gameId in allGamesId)
-            {
-                if (gamesId != null && !gamesId.Contains(gameId))
-                {
-                    postGameParam.GameId = gameId;
-
-                    await unitOfWork.PostGameRepository.DeletePostGameAsync(postGameParam);
-                }
-            }
-
-            await unitOfWork.PostRepository.ReplaceAsync(post);
-
-            unitOfWork.Commit();
-        }
-
         // Видаляємо пост
         public async Task DeletePostAsync(Guid postId)
         {  
             // Знаходимо пост за айді. У разі, якщо не знайде - викине вийняток 
-            _ = await unitOfWork.PostRepository.GetAsync(postId);
+            await unitOfWork.PostRepository.GetAsync(postId);
 
             // Отримання всіх CommentId, які пов'язані з постом
             IEnumerable<Guid> commentIds = await unitOfWork.PostCommentRepository.GetCommentsIdAsync(postId);

@@ -2,30 +2,49 @@ using Forum_BAL.Contracts;
 using Forum_BAL.Services;
 using Forum_DAL.Contracts;
 using Forum_DAL.Repositories;
+using Microsoft.OpenApi.Models;
 using System.Data;
 using System.Data.SqlClient;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+OpenApiContact contact = new()
+{
+    Name = "Vitalii Bondarenko",
+    Email = "bondarenko.vitalii@chnu.edu.ua"
+};
 
+OpenApiInfo info = new()
+{
+    Version = "v1",
+    Title = "Web API for Forum",
+    Contact = contact
+};
+
+// Add services to the container.
 builder.Services.AddControllers();
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-
-builder.Services.AddScoped(s => new SqlConnection(builder.Configuration.GetConnectionString("MSSQLConnection")));
-builder.Services.AddScoped<IDbTransaction>(s =>
+builder.Services.AddSwaggerGen(options =>
 {
-    SqlConnection connection = s.GetRequiredService<SqlConnection>();
+    options.SwaggerDoc("v1", info);
+});
+
+builder.Services.AddScoped(sqlConnection => new SqlConnection(builder.Configuration.GetConnectionString("MSSQLConnection")));
+builder.Services.AddScoped<IDbTransaction>(sqlConnection =>
+{
+    SqlConnection connection = sqlConnection.GetRequiredService<SqlConnection>();
+
     connection.Open();
+
     return connection.BeginTransaction();
 });
 
 // UnitOfWork
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
-// Services
+// Services(DAL)
 builder.Services.AddScoped<IPostRepository, PostRepository>();
 builder.Services.AddScoped<IGameRepository, GameRepository>();
 builder.Services.AddScoped<ICommentRepository, CommentRepository>();
@@ -39,7 +58,7 @@ builder.Services.AddScoped<ICommentReplyRepository, CommentReplyRepository>();
 // Services(BAL)
 builder.Services.AddScoped<IPostService, PostService>();
 builder.Services.AddScoped<ICommentService, CommentService>();
-builder.Services.AddScoped<IReplyToCommentService, ReplyToCommentService>();
+builder.Services.AddScoped<IReplyService, ReplyService>();
 
 WebApplication app = builder.Build();
 
@@ -51,8 +70,6 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
-app.UseAuthorization();
 
 app.MapControllers();
 

@@ -6,5 +6,8 @@ namespace Forum_DAL.Contracts
     {
         // Отримання всіх ReplyId, які пов'язані з коментарем
         Task<IEnumerable<Guid>> GetRepliesIdAsync(Guid commentId);
+
+        // Перевірка на зв'язаність коментаря та відповіді на коментар
+        Task<bool> ExistAsync(CommentReply commentReply);
     }
 }

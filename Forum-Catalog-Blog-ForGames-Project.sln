@@ -3,13 +3,21 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.5.33424.131
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Forum-API", "Forum-API\Forum-API.csproj", "{E13BD895-AA0C-42B0-B409-D2EE1416670C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Forum-WebAPI", "Forum-API\Forum-WebAPI.csproj", "{E13BD895-AA0C-42B0-B409-D2EE1416670C}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Forum-Project(ADO.NET+Dapper)", "Forum-Project(ADO.NET+Dapper)", "{7FE449C8-DAAF-4AD2-B7B5-475A450A1F14}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Forum-DAL", "Forum-DAL\Forum-DAL.csproj", "{86E17F83-249D-4E3C-9174-7F4904080AA1}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Forum-BAL", "Forum-BAL\Forum-BAL.csproj", "{539D5A6F-AB39-40B9-89DE-9C1AAF57044B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Catalog-of-Games-Project(EntityFramework)", "Catalog-of-Games-Project(EntityFramework)", "{AABE8380-3E76-42B9-86E6-B1F5A39EB8A3}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Catalog-of-Games-DAL", "Catalog-of-Games-DAL\Catalog-of-Games-DAL.csproj", "{832188C7-F822-4BCE-97CF-D6E218D60064}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Catalog-of-Games-BAL", "Catalog-of-Games-BAL\Catalog-of-Games-BAL.csproj", "{9D804921-D685-47AA-BBB0-64636E33A186}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Catalog-of-Games-WebAPI", "Catalog-of-Games-API\Catalog-of-Games-WebAPI.csproj", "{AA5DFC03-CD9C-4488-BBBE-AA7D792465EC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -29,13 +37,29 @@ Global
 		{539D5A6F-AB39-40B9-89DE-9C1AAF57044B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{539D5A6F-AB39-40B9-89DE-9C1AAF57044B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{539D5A6F-AB39-40B9-89DE-9C1AAF57044B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{832188C7-F822-4BCE-97CF-D6E218D60064}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{832188C7-F822-4BCE-97CF-D6E218D60064}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{832188C7-F822-4BCE-97CF-D6E218D60064}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{832188C7-F822-4BCE-97CF-D6E218D60064}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9D804921-D685-47AA-BBB0-64636E33A186}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9D804921-D685-47AA-BBB0-64636E33A186}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9D804921-D685-47AA-BBB0-64636E33A186}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9D804921-D685-47AA-BBB0-64636E33A186}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AA5DFC03-CD9C-4488-BBBE-AA7D792465EC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AA5DFC03-CD9C-4488-BBBE-AA7D792465EC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AA5DFC03-CD9C-4488-BBBE-AA7D792465EC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AA5DFC03-CD9C-4488-BBBE-AA7D792465EC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
+		{E13BD895-AA0C-42B0-B409-D2EE1416670C} = {7FE449C8-DAAF-4AD2-B7B5-475A450A1F14}
 		{86E17F83-249D-4E3C-9174-7F4904080AA1} = {7FE449C8-DAAF-4AD2-B7B5-475A450A1F14}
 		{539D5A6F-AB39-40B9-89DE-9C1AAF57044B} = {7FE449C8-DAAF-4AD2-B7B5-475A450A1F14}
+		{832188C7-F822-4BCE-97CF-D6E218D60064} = {AABE8380-3E76-42B9-86E6-B1F5A39EB8A3}
+		{9D804921-D685-47AA-BBB0-64636E33A186} = {AABE8380-3E76-42B9-86E6-B1F5A39EB8A3}
+		{AA5DFC03-CD9C-4488-BBBE-AA7D792465EC} = {AABE8380-3E76-42B9-86E6-B1F5A39EB8A3}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {61F11005-0CCD-4CC3-B1BA-338C8131E548}

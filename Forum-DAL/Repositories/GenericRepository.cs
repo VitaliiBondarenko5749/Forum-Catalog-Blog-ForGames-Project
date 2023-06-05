@@ -20,11 +20,16 @@ namespace Forum_DAL.Repositories
             this.tableName = tableName;
         }
 
-        public async Task<IEnumerable<T>> GetAllAsync()
+        public async Task<IEnumerable<T>> GetAllAsync(int pageNumber = 1, int pageSize = 10)
         {
-            return await sqlConnection.QueryAsync<T>($"SELECT * FROM {tableName};",
-                transaction: dbTransaction);
+            int offset = (pageNumber - 1) * pageSize;
+
+            string query = $"SELECT * FROM (SELECT *, ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) AS RowNum FROM {tableName}) " +
+                $"AS sub WHERE RowNum > @Offset AND RowNum <= @Offset + @PageSize;";
+
+            return await sqlConnection.QueryAsync<T>(query, new { PageSize = pageSize, Offset = offset }, transaction: dbTransaction);
         }
+
 
         public async Task<T> GetAsync(Guid id)
         {
@@ -56,7 +61,7 @@ namespace Forum_DAL.Repositories
         {
             string updateQuery = GenerateUpdateQuery();
 
-            _ = await sqlConnection.ExecuteAsync(updateQuery, param: model, transaction: dbTransaction);
+            await sqlConnection.ExecuteAsync(updateQuery, param: model, transaction: dbTransaction);
         }
 
         // Генерація INSERT запиту

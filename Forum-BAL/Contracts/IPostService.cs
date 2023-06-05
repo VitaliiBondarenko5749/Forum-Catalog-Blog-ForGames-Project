@@ -5,7 +5,7 @@ namespace Forum_BAL.Contracts
     public interface IPostService
     {
         // Отримуємо всі пости та ігри, які пов'язані до кожного поста
-        Task<IEnumerable<ShortPostInfoDTO>> GetAllPostsAsync();
+        Task<IEnumerable<ShortPostInfoDTO>> GetAllPostsAsync(int pageNumber, int pageSize);
 
         /* Отримуємо інформацію про конкретний пост та всю інформацію про нього:
          * Коментарі
@@ -14,9 +14,6 @@ namespace Forum_BAL.Contracts
 
         // Вставляємо новий пост
         Task AddPostAsync(PostInsertUpdateDTO postInsertDto);
-
-        // Оновлюємо пост
-        Task UpdatePostAsync(PostInsertUpdateDTO postUpdateDto);
 
         // Видаляємо пост
         Task DeletePostAsync(Guid postId);

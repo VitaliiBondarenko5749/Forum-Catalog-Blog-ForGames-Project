@@ -6,5 +6,11 @@ namespace Forum_DAL.Contracts
     {
         // Отримання лайків для відповіді(stored procedure)
         Task<int> GetLikesForReplyAsync(Guid replyId);
+
+        // Перевірка, чи поставив користувач лайк
+        Task<bool> ExistAsync(LikedReply likedReply);
+
+        // Видалення лайку
+        Task DeleteByUserAndReplyIdAsync(LikedReply likedReply);
     }
 }

@@ -17,5 +17,20 @@ namespace Forum_DAL.Repositories
             return await sqlConnection.ExecuteScalarAsync<int>("GetLikesForComment", param: new { CommentId = commentId },
                 transaction: dbTransaction, commandType: CommandType.StoredProcedure);
         }
+
+        // Перевірка, чи поставив користувач лайк
+        public async Task<bool> ExistAsync(LikedComment likedComment)
+        {
+            string query = "SELECT COUNT(*) FROM forum.LikedComments WHERE UserId = @UserId, CommentId = @CommentId;";
+
+            return await sqlConnection.QueryFirstOrDefaultAsync<int>(query, param: likedComment, transaction: dbTransaction) > 0;
+        }
+
+        // Видалення лайку
+        public async Task DeleteByUserAndCommentIdAsync(LikedComment likedComment)
+        {
+            await sqlConnection.ExecuteAsync("DELETE FROM forum.LikedComments WHERE UserId = @UserId, CommentId = @CommentId;",
+               param: likedComment, transaction: dbTransaction);
+        }
     }
 }

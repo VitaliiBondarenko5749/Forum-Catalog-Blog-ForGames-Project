@@ -1,7 +1,10 @@
-﻿using Forum_BAL.Contracts;
+﻿using FluentValidation.Results;
+using Forum_BAL.Contracts;
 using Forum_BAL.DTO;
+using Forum_BAL.Validators;
 using Forum_DAL.Contracts;
 using Forum_DAL.Models;
+using System.Text;
 
 namespace Forum_BAL.Services
 {
@@ -15,8 +18,23 @@ namespace Forum_BAL.Services
         }
 
         // Додання нового коментаря до поста
-        public async Task AddCommentToPostAsync(CommentInsertDTO commentInsertDto)
+        public async Task AddCommentAsync(CommentInsertDTO commentInsertDto)
         {
+            CommentValidator validator = new();
+            ValidationResult result = await validator.ValidateAsync(commentInsertDto);
+
+            if (!result.IsValid)
+            { 
+                StringBuilder stringBuilder = new();
+
+                foreach (ValidationFailure error in result.Errors)
+                {
+                    stringBuilder.AppendLine(error.ErrorMessage);
+                }
+
+                throw new InvalidDataException(stringBuilder.ToString());
+            }
+
             // Знайдемо пост в базі даних для перевірки його існування
             Post post = await unitOfWork.PostRepository.GetAsync(commentInsertDto.PostId);
 
@@ -32,6 +50,7 @@ namespace Forum_BAL.Services
 
             PostComment postComment = new()
             {
+                Id = Guid.NewGuid(),
                 PostId = post.Id,
                 CommentId = comment.Id
             };
@@ -44,10 +63,10 @@ namespace Forum_BAL.Services
         }
 
         // Видалення коментаря з поста
-        public async Task DeleteCommentFromPostAsync(PostComment postComment)
+        public async Task DeleteCommentAsync(PostComment postComment)
         {
             // Перевіряємо на пов'язаність коментар та пост + перевіряємо існування поста та коментаря
-            _ = await unitOfWork.PostCommentRepository.GetCommentIdByCommentAndPostIdsAsync(postComment);
+            await unitOfWork.PostCommentRepository.GetCommentIdByCommentAndPostIdsAsync(postComment);
 
             // Отримуємо всі ReplyId, які пов'язані з коментарем
             IEnumerable<Guid>? repliesId = await unitOfWork.CommentReplyRepository.GetRepliesIdAsync(postComment.CommentId);
@@ -66,6 +85,45 @@ namespace Forum_BAL.Services
             await unitOfWork.CommentRepository.DeleteAsync(postComment.CommentId);
 
             // Підтверджуємо зміни в базі даних
+            unitOfWork.Commit();
+        }
+
+        // Додаємо лайк до коментаря
+        public async Task AddLikeAsync(PostComment postComment, LikedComment likedComment)
+        {
+            bool hasData = await unitOfWork.PostCommentRepository.ExistAsync(postComment);
+
+            if (!hasData)
+            {
+                throw new InvalidDataException("There's no connected Post and Comment in the database.");
+            }
+
+            hasData = await unitOfWork.LikedCommentRepository.ExistAsync(likedComment);
+
+            if (hasData)
+            {
+                throw new DuplicateWaitObjectException("There's the same data in the database.");
+            }
+
+            likedComment.Id = Guid.NewGuid();   
+        
+            await unitOfWork.LikedCommentRepository.AddAsync(likedComment);
+
+            unitOfWork.Commit();
+        }
+
+        // Видаляємо лайк з коментаря
+        public async Task DeleteLikeAsync(PostComment postComment, LikedComment likedComment)
+        {
+            bool hasData = await unitOfWork.PostCommentRepository.ExistAsync(postComment);
+
+            if (!hasData)
+            {
+                throw new InvalidDataException("There's no connected Post and Comment in the database.");
+            }
+
+            await unitOfWork.LikedCommentRepository.DeleteByUserAndCommentIdAsync(likedComment);
+
             unitOfWork.Commit();
         }
     }
